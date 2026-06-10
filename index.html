@@ -97,13 +97,6 @@
 
   <div id="screen-end" class="hidden"></div>
 
-  <div id="secret-result" class="hidden">
-    <div class="screen">
-      <h2>Experimental Data</h2>
-      <p id="data-display" style="font-family: monospace; text-align: left; background: #222; padding: 10px;"></p>
-      <button class="btn btn-primary" onclick="location.reload()">閉じてリセット</button>
-    </div>
-  </div>
 
   <script>
     /* 動きの設定（JavaScript） */
@@ -435,18 +428,6 @@
 
       document.getElementById('screen-main').classList.add('hidden');
 
-      // リザルト表示用テキスト
-      let displayData = `Condition: ${cond}\nDecision: ${decision}\nTime: ${timeElapsed}ms\nMouse: ${Math.round(mouseDistance)}px`;
-      if (extra.checkedCount !== undefined) {
-        displayData += `\nChecked: ${extra.checkedCount}`;
-        displayData += `\nItems:\n  ${extra.checkedItems.join('\n  ')}`;
-      }
-      if (extra.altServices && extra.altServices.length > 0)
-        displayData += `\nAltServices: ${extra.altServices.join(' / ')}`;
-      if (extra.freeText)
-        displayData += `\nFreeText: ${extra.freeText}`;
-      document.getElementById('data-display').innerText = displayData;
-      console.log("Result:", displayData);
 
       // スプレッドシートへ送信
       const payload = {
@@ -651,9 +632,6 @@
       el.className = 'screen';
       el.style.maxWidth = '730px';
       el.innerHTML = `
-        <button onclick="document.getElementById('secret-result').classList.toggle('hidden')"
-          style="background:#2e2e2e; border:none; color:#2e2e2e; width:12px; height:12px;
-                 border-radius:2px; cursor:pointer; padding:0; float:right;">■</button>
         <p style="margin-bottom:8px;">お手続きありがとうございました。以上でシミュレーションは終了です。</p>
         <p>引き続き、画面の指示に従ってアンケートの回答にご協力をお願いいたします。</p>
         ${surveyBlock}
@@ -661,12 +639,6 @@
       `;
     }
 
-    // Shift + R で隠しリザルトを表示
-    document.addEventListener('keydown', e => {
-      if (e.shiftKey && e.key === 'R') {
-        document.getElementById('secret-result').classList.toggle('hidden');
-      }
-    });
   </script>
 </body>
 </html>
