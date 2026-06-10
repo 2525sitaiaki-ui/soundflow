@@ -79,75 +79,14 @@
       justify-content: center; align-items: center; z-index: 1000;
     }
 
-    /* 導入画面（同意・シミュレーション設定）：青ベース */
-    body.intro-mode {
-      background-color: #0b1e3a;
-    }
-    body.intro-mode .screen {
-      background: #122a50;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-    #screen-consent, #screen-intro {
-      max-width: 680px;
-    }
-    #screen-intro {
-      background: transparent;
-      box-shadow: none;
-    }
-    body.intro-mode .btn-primary {
-      background-color: #1976d2;
-      color: #fff;
-    }
-    body.intro-mode p {
-      color: #ffffff;
-    }
-    body.intro-mode .step-indicator {
-      color: #90caf9;
-    }
   </style>
 </head>
-<body class="intro-mode">
+<body>
 
-  <div id="screen-consent" class="screen">
-    <h1>【実験へのご協力のお願い】</h1>
-    <p style="text-align: left; font-size: 13px;">
-      本調査は、オンラインサービスの操作性に関する学術研究です。<br><br>
-      <strong>■ 調査内容</strong><br>
-      音楽配信サービスの解約シミュレーション（所要時間：1〜3分）<br><br>
-      <strong>■ 協力の任意性について</strong><br>
-      本実験への協力は任意です。<br>不快感を感じたり、操作を続けられないと判断した場合は、<strong>いつでも自由に中断いただけます。</strong><br><br>
-      <strong>■ データの取り扱い</strong><br>
-      収集したデータ（操作時間等）は統計的に処理され、個人が特定されることはありません。
-    </p>
-    <label style="display:flex; align-items:center; gap:10px; justify-content:center;
-                   margin-bottom:16px; font-size:14px; cursor:pointer;">
-      <input type="checkbox" id="consent-check" onchange="toggleConsentBtn()"
-             style="width:18px; height:18px; accent-color:#1976d2; flex-shrink:0;">
-      状況を理解しました
-    </label>
-    <button id="consent-btn" class="btn btn-primary" disabled onclick="showIntro()"
-            style="opacity:0.4; cursor:not-allowed;">
-      シミュレーション設定へ進む
-    </button>
+  <div id="screen-start" class="screen">
+    <h1 style="font-size:20px; margin-bottom:32px;">SoundFlow</h1>
+    <button class="btn btn-primary" onclick="startExperiment()">解約手続きを開始する</button>
   </div>
-
-  <div id="screen-intro" class="hidden" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80vh; text-align:center; box-sizing:border-box; width:100%;">
-    <h1 style="font-size:16px; color:#9ca3af; letter-spacing:3px; margin-bottom:48px; font-weight:500;">【シミュレーション設定】</h1>
-    <div style="font-size:18px; line-height:1.8; color:#e5e7eb; margin-bottom:48px; font-weight:400; letter-spacing:0.5px;">
-      あなたは音楽配信サービス「SoundFlow」プレミアムプランを<br>利用していましたが、<strong style="color:#fff; font-size:20px; background:linear-gradient(transparent 70%, rgba(25,118,210,0.4) 70%); padding:0 4px;">『月額料金が高い』</strong>と感じています。
-    </div>
-    <div style="font-size:28px; font-weight:700; color:#fff; letter-spacing:1px;">
-      解約手続きを行ってください。
-    </div>
-  </div>
-
-  <button id="start-btn" disabled onclick="startExperiment()"
-    style="position:fixed; bottom:24px; right:24px; width:auto; padding:12px 20px;
-           border-radius:500px; border:none; font-weight:bold; font-size:14px; cursor:not-allowed;
-           background-color:#1976d2; color:#fff; opacity:0.5; transition:opacity 0.2s, background-color 0.15s, color 0.15s;
-           display:none; z-index:100;">
-    状況設定をよくお読みください
-  </button>
 
   <div id="screen-main" class="screen hidden" style="padding-top:0;">
     <div style="text-align:left; padding:14px 0 14px; border-bottom:1px solid #282828; margin-bottom:24px;">
@@ -198,36 +137,10 @@
       }
     });
 
-    function toggleConsentBtn() {
-      const checked = document.getElementById('consent-check').checked;
-      const btn = document.getElementById('consent-btn');
-      btn.disabled = !checked;
-      btn.style.opacity = checked ? '1' : '0.4';
-      btn.style.cursor = checked ? 'pointer' : 'not-allowed';
-    }
-
-    // 画面切り替え：同意 → 設定
-    function showIntro() {
-      document.getElementById('screen-consent').classList.add('hidden');
-      document.getElementById('screen-intro').classList.remove('hidden');
-
-      const btn = document.getElementById('start-btn');
-      btn.style.display = 'block';
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-        btn.textContent = '解約手続きを開始する';
-      }, 6000);
-    }
-
-    // 画面切り替え：設定 → 実験開始
     function startExperiment() {
-      document.body.classList.remove('intro-mode');
-      document.getElementById('screen-intro').classList.add('hidden');
+      document.getElementById('screen-start').classList.add('hidden');
       document.getElementById('screen-main').classList.remove('hidden');
-      document.getElementById('start-btn').style.display = 'none';
-      startTime = Date.now(); // ここで計測開始
+      startTime = Date.now();
       active = true;
       renderStep();
     }
