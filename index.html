@@ -494,6 +494,8 @@
       };
       const q1 = get('q1'), q2 = get('q2'), q3 = get('q3'), q4 = get('q4');
       const q5 = (document.getElementById('survey-q5') || {}).value || '';
+      const age = (document.getElementById('survey-age') || {}).value || '';
+      const gender = get('gender');
       const msg = document.getElementById('survey-msg');
 
       if (!q1 || !q2 || !q3 || !q4) {
@@ -507,7 +509,7 @@
       fetch(GAS_URL, {
         method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'survey', participantId: participantId, condition: cond, decision: decCode, q1, q2, q3, q4, q5 })
+        body: JSON.stringify({ type: 'survey', participantId: participantId, condition: cond, decision: decCode, age, gender, q1, q2, q3, q4, q5 })
       }).then(() => {
         msg.style.color = '#1DB954';
         msg.textContent = '✓ 送信しました。下にスクロールすると正常に解約できたか確認できます。';
@@ -587,13 +589,32 @@
             </div>
           </div>
 
-          <div style="${cardStyle}margin-bottom:16px;">
+          <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑤ 今回の操作で印象に残った点・不快に感じた点があれば自由にご記入ください（任意）</strong>
             </p>
             <textarea id="survey-q5" rows="3" placeholder="自由にご記入ください"
               style="width:100%;background:#ffffff;border:none;border-bottom:1px solid #dadce0;color:#202124;
                      padding:4px 0;resize:none;font-size:13px;box-sizing:border-box;outline:none;"></textarea>
+          </div>
+
+          <div style="${cardStyle}">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>⑥ 年齢をご記入ください（任意）</strong>
+            </p>
+            <input id="survey-age" type="number" min="0" max="120" placeholder="例：21"
+              style="width:100px;background:#ffffff;border:none;border-bottom:1px solid #dadce0;
+                     color:#202124;padding:4px 0;font-size:13px;outline:none;">
+          </div>
+
+          <div style="${cardStyle}margin-bottom:16px;">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>⑦ 性別をお選びください（任意）</strong>
+            </p>
+            ${['男','女','その他','回答しない'].map(v => `
+              <label style="${qLabel}">
+                <input type="radio" name="gender" value="${v}" style="${rbStyle}"> ${v}
+              </label>`).join('')}
           </div>
 
           <button onclick="submitSurvey('${decCode}')"
