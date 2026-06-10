@@ -489,7 +489,7 @@
     function renderEndScreen(decision) {
       const el = document.getElementById('screen-end');
       el.classList.remove('hidden');
-      const decCode = decision === 'cancel' ? '0' : '1';
+      const decCode = decision;
 
       const lStyle = 'display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;';
       const rbStyle = 'flex-shrink:0;';
