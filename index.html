@@ -49,6 +49,8 @@
     .btn-keep-a:hover { filter: brightness(1.4); }
     .btn-outline { background: transparent; color: white; border: 1px solid #727272; margin-top: 12px; }
     .btn-outline:hover { filter: brightness(1.4); }
+    .btn-cancel-b { background: #d8d8d8; color: black; border: none; }
+    .btn-cancel-b:hover { filter: none; background: #ffffff; }
 
     .hidden { display: none !important; }
     .step-indicator { color: var(--text-sub); font-size: 12px; margin-bottom: 10px; }
@@ -265,7 +267,7 @@
                 <div id="b-other-hint" style="font-size:11px;color:#727272;">0 / 10文字以上</div>
               </div>
             </div>
-            <button id="next-btn-b" class="btn btn-outline" disabled onclick="advanceBStep1()"
+            <button id="next-btn-b" class="btn btn-cancel-b" disabled onclick="advanceBStep1()"
                     style="opacity:0.4;cursor:not-allowed;">次へ進む</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
           `;
@@ -294,7 +296,7 @@
               スマートスピーカーや車載ナビゲーションシステムなど、一部の外部連携デバイスにおける「オンデマンド再生（曲を選んで再生する機能）」はご利用いただけなくなり、シャッフル再生のみとなります。
               <div id="terms-bottom" style="height:1px;margin-top:20px;"></div>
             </div>
-            <button id="terms-confirm-btn" class="btn btn-outline" disabled onclick="nextStep()"
+            <button id="terms-confirm-btn" class="btn btn-cancel-b" disabled onclick="nextStep()"
                     style="opacity:0.4;cursor:not-allowed;">最後までお読みください</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="prevStep()">戻る（ステップ1へ）</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
@@ -308,7 +310,7 @@
               ※「解約を確定する」ボタンを押すことで手続きが正式に完了し、次回更新日（${deadlineStr}）以降は自動的に無料プランへ移行します。<br><br>
               ※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。
             </p>
-            <button class="btn btn-outline"
+            <button class="btn btn-cancel-b"
               onclick="showCancelConfirm({checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
               解約を確定する
             </button>
