@@ -36,18 +36,19 @@
     .btn {
       display: block; width: 100%; padding: 14px;
       border-radius: 500px; border: none; font-weight: bold;
-      font-size: 16px; cursor: pointer; transition: background-color 0.15s, color 0.15s, transform 0.2s;
+      font-size: 16px; cursor: pointer; transition: filter 0.15s, background-color 0.15s, color 0.15s, transform 0.2s;
     }
     .btn:active { transform: scale(0.98); }
     .btn-primary { background-color: var(--primary-color); color: black; }
-    .btn-primary:hover { background-color: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
-    .btn-primary-textonly:hover { background-color: var(--primary-color); color: white; border: none; }
+    .btn-primary:hover { filter: brightness(1.15); }
+    .btn-primary-textonly:hover { filter: brightness(1.15); }
     .btn-cancel-a { background: white; color: black; }
-    .btn-cancel-a:hover { background-color: #e91429; color: white; }
+    .btn-cancel-a:hover { filter: brightness(1.05); }
+    #btn-confirm-cancel:hover { filter: none; background-color: #e91429; color: white; }
     .btn-keep-a { background: black; color: white; border: 1px solid #727272; margin-top: 12px; }
-    .btn-keep-a:hover { background: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
+    .btn-keep-a:hover { filter: brightness(1.4); }
     .btn-outline { background: transparent; color: white; border: 1px solid #727272; margin-top: 12px; }
-    .btn-outline:hover { background: white; color: black; border-color: white; }
+    .btn-outline:hover { filter: brightness(1.4); }
 
     .hidden { display: none !important; }
     .step-indicator { color: var(--text-sub); font-size: 12px; margin-bottom: 10px; }
@@ -107,7 +108,7 @@
     <div class="screen" style="max-width:340px;padding:32px 24px;">
       <h1 style="font-size:18px;margin-bottom:12px;">解約を確定しますか？</h1>
       <p style="margin-bottom:24px;">この操作は取り消せません。</p>
-      <button class="btn btn-cancel-a" onclick="confirmCancel()">はい、解約します</button>
+      <button class="btn btn-cancel-a" id="btn-confirm-cancel" onclick="confirmCancel()">はい、解約します</button>
       <button class="btn btn-keep-a" onclick="dismissCancel()">いいえ、戻る</button>
     </div>
   </div>
