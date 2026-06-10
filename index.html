@@ -97,6 +97,16 @@
 
   <div id="screen-end" class="hidden"></div>
 
+  <div id="modal-confirm" class="hidden" style="position:fixed;top:0;left:0;width:100%;height:100%;
+       background:rgba(0,0,0,0.75);display:flex;justify-content:center;align-items:center;z-index:500;">
+    <div class="screen" style="max-width:340px;padding:32px 24px;">
+      <h1 style="font-size:18px;margin-bottom:12px;">解約を確定しますか？</h1>
+      <p style="margin-bottom:24px;">この操作は取り消せません。</p>
+      <button class="btn btn-cancel-a" onclick="confirmCancel()">はい、解約します</button>
+      <button class="btn btn-keep-a" onclick="dismissCancel()">いいえ、戻る</button>
+    </div>
+  </div>
+
 
   <script>
     /* 動きの設定（JavaScript） */
@@ -115,6 +125,7 @@
     let startTime, endTime;
     let mouseDistance = 0;
     let participantId = '';
+    let pendingCancelExtra = null;
     let lastX = 0, lastY = 0;
     let currentStep = 1;
     let active = false;
@@ -130,6 +141,19 @@
         lastX = e.pageX; lastY = e.pageY;
       }
     });
+
+    function showCancelConfirm(extra = {}) {
+      pendingCancelExtra = extra;
+      document.getElementById('modal-confirm').classList.remove('hidden');
+    }
+    function confirmCancel() {
+      document.getElementById('modal-confirm').classList.add('hidden');
+      finishExp('cancel', pendingCancelExtra);
+    }
+    function dismissCancel() {
+      document.getElementById('modal-confirm').classList.add('hidden');
+      pendingCancelExtra = null;
+    }
 
     function startExperiment() {
       participantId = String(Math.floor(100000 + Math.random() * 900000));
@@ -158,7 +182,7 @@
               <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">高音質ストリーミング</span>
             </div>
           </div>
-          <button class="btn btn-cancel-a" onclick="finishExp('cancel')">解約を確定する</button>
+          <button class="btn btn-cancel-a" onclick="showCancelConfirm()">解約を確定する</button>
           <button class="btn btn-keep-a" onclick="finishExp('keep')">解約せずに戻る</button>
         `;
       } else if (cond === 'B') {
@@ -267,7 +291,7 @@
               ※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。
             </p>
             <button class="btn btn-outline"
-              onclick="finishExp('cancel',{checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
+              onclick="showCancelConfirm({checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
               解約を確定する
             </button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">
@@ -303,7 +327,7 @@
             </div>
           </div>
           <p style="color:#e91429; font-weight:bold; margin-bottom:20px;">⚠ 本当によろしいですか？</p>
-          <button class="btn btn-outline" onclick="finishExp('cancel')">はい、すべての特典を放棄して解約します</button>
+          <button class="btn btn-outline" onclick="showCancelConfirm()">はい、すべての特典を放棄して解約します</button>
           <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">いいえ、快適な音楽体験を維持します</button>
         `;
       } else if (cond === 'C') {
@@ -321,7 +345,7 @@
             </div>
           </div>
           <button class="btn btn-primary btn-primary-textonly" style="margin-bottom:12px;" onclick="finishExp('keep')">現在のプランを維持</button>
-          <button class="deceptive-link" onclick="finishExp('cancel', {})">解約を確定</button>
+          <button class="deceptive-link" onclick="showCancelConfirm()">解約を確定</button>
         `;
       }
     }
