@@ -132,7 +132,7 @@
     });
 
     function startExperiment() {
-      participantId = Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      participantId = String(Math.floor(100000 + Math.random() * 900000));
       document.getElementById('screen-start').classList.add('hidden');
       document.getElementById('screen-main').classList.remove('hidden');
       startTime = Date.now();
