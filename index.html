@@ -129,6 +129,7 @@
 
     let startTime, endTime;
     let mouseDistance = 0;
+    let clickCount = 0;
     let participantId = '';
     let pendingCancelExtra = null;
     let lastX = 0, lastY = 0;
@@ -137,7 +138,6 @@
     let selectedReasons = [];
     let bReasons = [], bAltServices = [], bFreeText = '';
 
-    // マウスの動きを計測する
     document.addEventListener('mousemove', e => {
       if (active) {
         if (lastX !== 0) {
@@ -145,6 +145,10 @@
         }
         lastX = e.pageX; lastY = e.pageY;
       }
+    });
+
+    document.addEventListener('click', () => {
+      if (active) clickCount++;
     });
 
     function showCancelConfirm(extra = {}) {
@@ -477,6 +481,7 @@
         dropStep:     currentStep,
         time:         timeElapsed,
         mouse:        Math.round(mouseDistance),
+        clicks:       clickCount,
         checkedCount: extra.checkedCount ?? null,
         checkedItems: extra.checkedItems ? extra.checkedItems.join(' / ') : null,
         altServices:  extra.altServices ? extra.altServices.join(' / ') : null,
