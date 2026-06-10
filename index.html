@@ -114,6 +114,7 @@
 
     let startTime, endTime;
     let mouseDistance = 0;
+    let participantId = '';
     let lastX = 0, lastY = 0;
     let currentStep = 1;
     let active = false;
@@ -131,6 +132,7 @@
     });
 
     function startExperiment() {
+      participantId = Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
       document.getElementById('screen-start').classList.add('hidden');
       document.getElementById('screen-main').classList.remove('hidden');
       startTime = Date.now();
@@ -431,6 +433,7 @@
 
       // スプレッドシートへ送信
       const payload = {
+        participantId: participantId,
         condition:    cond,
         decision:     decision,
         time:         timeElapsed,
@@ -470,7 +473,7 @@
       fetch(GAS_URL, {
         method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'survey', condition: cond, decision: decCode, q1, q2, q3, q4, q5 })
+        body: JSON.stringify({ type: 'survey', participantId: participantId, condition: cond, decision: decCode, q1, q2, q3, q4, q5 })
       }).then(() => {
         msg.style.color = '#1DB954';
         msg.textContent = '✓ 送信しました。下にスクロールすると正常に解約できたか確認できます。';
