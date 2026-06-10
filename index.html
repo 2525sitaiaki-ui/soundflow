@@ -155,6 +155,11 @@
       pendingCancelExtra = null;
     }
 
+    function prevStep() {
+      currentStep--;
+      renderStep();
+    }
+
     function startExperiment() {
       participantId = String(Math.floor(100000 + Math.random() * 900000));
       document.getElementById('screen-start').classList.add('hidden');
@@ -252,6 +257,7 @@
             </div>
             <button id="next-btn-b" class="btn btn-outline" disabled onclick="advanceBStep1()"
                     style="opacity:0.4;cursor:not-allowed;">次へ進む</button>
+            <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
           `;
         } else if (currentStep === 2) {
           area.innerHTML = `
@@ -280,6 +286,8 @@
             </div>
             <button id="terms-confirm-btn" class="btn btn-outline" disabled onclick="nextStep()"
                     style="opacity:0.4;cursor:not-allowed;">最後までお読みください</button>
+            <button class="btn btn-outline" style="margin-top:12px;" onclick="prevStep()">戻る（ステップ1へ）</button>
+            <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
           `;
         } else {
           area.innerHTML = `
@@ -294,8 +302,9 @@
               onclick="showCancelConfirm({checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
               解約を確定する
             </button>
+            <button class="btn btn-outline" style="margin-top:12px;" onclick="prevStep()">戻る（ステップ2へ）</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">
-              解約せずにマイページに戻る
+              解約手続きを中止する
             </button>
           `;
         }
@@ -460,6 +469,7 @@
         participantId: participantId,
         condition:    cond,
         decision:     decision,
+        dropStep:     currentStep,
         time:         timeElapsed,
         mouse:        Math.round(mouseDistance),
         checkedCount: extra.checkedCount ?? null,
