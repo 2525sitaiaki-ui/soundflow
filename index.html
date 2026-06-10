@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>SoundFlow - Music for Everyone</title>
+  <style>
+    /* デザイン設定（CSS） */
+    :root {
+      --bg-color: #000000;
+      --card-bg: #121212;
+      --primary-color: #1DB954; /* Spotify風グリーン */
+      --text-main: #ffffff;
+      --text-sub: #b3b3b3;
+      --danger: #e91429;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      display: flex; justify-content: center; align-items: flex-start;
+      min-height: 100vh; margin: 0; overflow-y: auto;
+      padding: 20px 0;
+      box-sizing: border-box;
+    }
+
+    .screen {
+      width: 100%; max-width: 500px; padding: 40px 20px;
+      text-align: center; background: var(--card-bg);
+      border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    h1 { font-size: 24px; margin-bottom: 20px; }
+    p { font-size: 14px; color: var(--text-sub); line-height: 1.6; margin-bottom: 30px; }
+
+    .btn {
+      display: block; width: 100%; padding: 14px;
+      border-radius: 500px; border: none; font-weight: bold;
+      font-size: 16px; cursor: pointer; transition: background-color 0.15s, color 0.15s, transform 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background-color: var(--primary-color); color: black; }
+    .btn-primary:hover { background-color: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
+    .btn-primary-textonly:hover { background-color: var(--primary-color); color: white; border: none; }
+    .btn-cancel-a { background: white; color: black; }
+    .btn-cancel-a:hover { background-color: #e91429; color: white; }
+    .btn-keep-a { background: black; color: white; border: 1px solid #727272; margin-top: 12px; }
+    .btn-keep-a:hover { background: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
+    .btn-outline { background: transparent; color: white; border: 1px solid #727272; margin-top: 12px; }
+    .btn-outline:hover { background: white; color: black; border-color: white; }
+
+    .hidden { display: none !important; }
+    .step-indicator { color: var(--text-sub); font-size: 12px; margin-bottom: 10px; }
+    
+    textarea {
+      width: 100%; background: #282828; border: none; color: white;
+      padding: 12px; border-radius: 4px; margin-bottom: 20px; resize: none;
+    }
+
+    #survey-form input[type="radio"] {
+      appearance: none; -webkit-appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid #bdc1c6; background: white;
+      cursor: pointer; transition: border-color 0.1s, background 0.1s;
+      flex-shrink: 0;
+    }
+    #survey-form input[type="radio"]:checked {
+      background: #1a73e8; border-color: #1a73e8;
+    }
+
+    .deceptive-link {
+      background: none; border: none; color: #b3b3b3;
+      text-decoration: underline; font-size: 12px; margin-top: 20px; cursor: pointer;
+    }
+
+    #secret-result {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+      justify-content: center; align-items: center; z-index: 1000;
+    }
+
+    /* 導入画面（同意・シミュレーション設定）：青ベース */
+    body.intro-mode {
+      background-color: #0b1e3a;
+    }
+    body.intro-mode .screen {
+      background: #122a50;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    #screen-consent, #screen-intro {
+      max-width: 680px;
+    }
+    #screen-intro {
+      background: transparent;
+      box-shadow: none;
+    }
+    body.intro-mode .btn-primary {
+      background-color: #1976d2;
+      color: #fff;
+    }
+    body.intro-mode p {
+      color: #ffffff;
+    }
+    body.intro-mode .step-indicator {
+      color: #90caf9;
+    }
+  </style>
+</head>
+<body class="intro-mode">
+
+  <div id="screen-consent" class="screen">
+    <h1>【実験へのご協力のお願い】</h1>
+    <p style="text-align: left; font-size: 13px;">
+      本調査は、オンラインサービスの操作性に関する学術研究です。<br><br>
+      <strong>■ 調査内容</strong><br>
+      音楽配信サービスの解約シミュレーション（所要時間：1〜3分）<br><br>
+      <strong>■ 協力の任意性について</strong><br>
+      本実験への協力は任意です。<br>不快感を感じたり、操作を続けられないと判断した場合は、<strong>いつでも自由に中断いただけます。</strong><br><br>
+      <strong>■ データの取り扱い</strong><br>
+      収集したデータ（操作時間等）は統計的に処理され、個人が特定されることはありません。
+    </p>
+    <label style="display:flex; align-items:center; gap:10px; justify-content:center;
+                   margin-bottom:16px; font-size:14px; cursor:pointer;">
+      <input type="checkbox" id="consent-check" onchange="toggleConsentBtn()"
+             style="width:18px; height:18px; accent-color:#1976d2; flex-shrink:0;">
+      状況を理解しました
+    </label>
+    <button id="consent-btn" class="btn btn-primary" disabled onclick="showIntro()"
+            style="opacity:0.4; cursor:not-allowed;">
+      シミュレーション設定へ進む
+    </button>
+  </div>
+
+  <div id="screen-intro" class="hidden" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80vh; text-align:center; box-sizing:border-box; width:100%;">
+    <h1 style="font-size:16px; color:#9ca3af; letter-spacing:3px; margin-bottom:48px; font-weight:500;">【シミュレーション設定】</h1>
+    <div style="font-size:18px; line-height:1.8; color:#e5e7eb; margin-bottom:48px; font-weight:400; letter-spacing:0.5px;">
+      あなたは音楽配信サービス「SoundFlow」プレミアムプランを<br>利用していましたが、<strong style="color:#fff; font-size:20px; background:linear-gradient(transparent 70%, rgba(25,118,210,0.4) 70%); padding:0 4px;">『月額料金が高い』</strong>と感じています。
+    </div>
+    <div style="font-size:28px; font-weight:700; color:#fff; letter-spacing:1px;">
+      解約手続きを行ってください。
+    </div>
+  </div>
+
+  <button id="start-btn" disabled onclick="startExperiment()"
+    style="position:fixed; bottom:24px; right:24px; width:auto; padding:12px 20px;
+           border-radius:500px; border:none; font-weight:bold; font-size:14px; cursor:not-allowed;
+           background-color:#1976d2; color:#fff; opacity:0.5; transition:opacity 0.2s, background-color 0.15s, color 0.15s;
+           display:none; z-index:100;">
+    状況設定をよくお読みください
+  </button>
+
+  <div id="screen-main" class="screen hidden" style="padding-top:0;">
+    <div style="text-align:left; padding:14px 0 14px; border-bottom:1px solid #282828; margin-bottom:24px;">
+      <span style="font-size:20px; font-weight:bold; color:#1DB954; letter-spacing:1px;">SoundFlow</span>
+    </div>
+    <div id="content-area"></div>
+  </div>
+
+  <div id="screen-end" class="hidden"></div>
+
+  <div id="secret-result" class="hidden">
+    <div class="screen">
+      <h2>Experimental Data</h2>
+      <p id="data-display" style="font-family: monospace; text-align: left; background: #222; padding: 10px;"></p>
+      <button class="btn btn-primary" onclick="location.reload()">閉じてリセット</button>
+    </div>
+  </div>
+
+  <script>
+    /* 動きの設定（JavaScript） */
+    
+    // URLから条件(A, B, C)を読み取る
+    const urlParams = new URLSearchParams(window.location.search);
+    const cond = (urlParams.get('cond') || 'A').toUpperCase();
+
+    // 今日から7日後の日付
+    const _d = new Date(); _d.setDate(_d.getDate() + 7);
+    const fmt = d => `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+    const deadlineStr = fmt(_d);
+    const _d2 = new Date(_d); _d2.setDate(_d2.getDate() + 1);
+    const nextDayStr = fmt(_d2);
+
+    let startTime, endTime;
+    let mouseDistance = 0;
+    let lastX = 0, lastY = 0;
+    let currentStep = 1;
+    let active = false;
+    let selectedReasons = [];
+    let bReasons = [], bAltServices = [], bFreeText = '';
+
+    // マウスの動きを計測する
+    document.addEventListener('mousemove', e => {
+      if (active) {
+        if (lastX !== 0) {
+          mouseDistance += Math.sqrt(Math.pow(e.pageX - lastX, 2) + Math.pow(e.pageY - lastY, 2));
+        }
+        lastX = e.pageX; lastY = e.pageY;
+      }
+    });
+
+    function toggleConsentBtn() {
+      const checked = document.getElementById('consent-check').checked;
+      const btn = document.getElementById('consent-btn');
+      btn.disabled = !checked;
+      btn.style.opacity = checked ? '1' : '0.4';
+      btn.style.cursor = checked ? 'pointer' : 'not-allowed';
+    }
+
+    // 画面切り替え：同意 → 設定
+    function showIntro() {
+      document.getElementById('screen-consent').classList.add('hidden');
+      document.getElementById('screen-intro').classList.remove('hidden');
+
+      const btn = document.getElementById('start-btn');
+      btn.style.display = 'block';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.textContent = '解約手続きを開始する';
+      }, 6000);
+    }
+
+    // 画面切り替え：設定 → 実験開始
+    function startExperiment() {
+      document.body.classList.remove('intro-mode');
+      document.getElementById('screen-intro').classList.add('hidden');
+      document.getElementById('screen-main').classList.remove('hidden');
+      document.getElementById('start-btn').style.display = 'none';
+      startTime = Date.now(); // ここで計測開始
+      active = true;
+      renderStep();
+    }
+
+    // 条件に合わせた画面の中身を作る
+    function renderStep() {
+      const area = document.getElementById('content-area');
+      
+      if (cond === 'A') {
+        // 条件A: 誠実なUI
+        area.innerHTML = `
+          <h1>解約の確認</h1>
+          <p style="margin-bottom:16px;">解約後も<strong>${deadlineStr}</strong>までは再生可能です。いつでも再開できます。</p>
+          <div style="background:#1a1a1a; border-radius:8px; padding:16px; margin-bottom:24px; text-align:left;">
+            <div style="font-size:13px; color:#b3b3b3; margin-bottom:8px;">現在のプラン</div>
+            <div style="font-size:16px; font-weight:bold; margin-bottom:12px;">プレミアム個人（¥980 / 月）</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">広告なし</span>
+              <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">オンデマンド再生</span>
+              <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">高音質ストリーミング</span>
+            </div>
+          </div>
+          <button class="btn btn-cancel-a" onclick="finishExp('cancel')">解約を確定する</button>
+          <button class="btn btn-keep-a" onclick="finishExp('keep')">解約せずに戻る</button>
+        `;
+      } else if (cond === 'B') {
+        // 条件B: 手続きを長くする
+        if (currentStep === 1) {
+          const lStyle = 'display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;text-align:left;font-size:13px;cursor:pointer;line-height:1.5;';
+          const cbStyle = 'margin-top:2px;accent-color:var(--primary-color);flex-shrink:0;';
+          const normals = [
+            '楽曲の検索機能が使いにくく、目的の曲やアーティストが見つけにくい',
+            'ポッドキャストやラジオ番組のラインナップに興味が持てない、または少ない',
+            'アプリの強制終了や音切れなど、サービスの利用に関して技術的な問題があった',
+            '無料トライアル期間が短すぎたため、サービスの価値を十分に判断できなかった',
+            '音質が低く、期待していたクオリティの音楽体験が得られなかった',
+            'アプリケーションの動作全体が重く、画面の遷移や読み込みにストレスを感じる',
+            '学生割引やファミリープランなど、特定のプランの認証・登録手続きに問題があった',
+            'レコメンド（おすすめ）機能の精度が低く、自分の好みに合う音楽やポッドキャストが見つからなかった',
+            'アプリからの通知（新曲案内やおすすめ、広告等）が多すぎて煩わしい',
+            'オフライン再生（楽曲ダウンロード機能）の保存可能件数や制限に不満がある',
+            'クレジットカードの承認エラーなど、お支払いおよび請求に問題があった',
+            '楽曲の総数や配信ラインナップ自体が不十分である',
+            '生活スタイルの変化などにより、サービスの定期購入をあまり利用しなかった',
+            '定期購入（サブスクリプション）の料金を支払う余裕がない（月額料金が高い）',
+            '現在のプランから、別のプラン（ファミリープランや年額プラン等）に切り替える',
+          ];
+          const normalHtml = normals.map(r =>
+            `<label style="${lStyle}"><input type="checkbox" class="b-main-cb" value="${r}" onchange="checkBStep1()" style="${cbStyle}"><span>${r}</span></label>`
+          ).join('');
+          const altServiceNames = ['Apple Music','Amazon Music','YouTube Music','LINE MUSIC','AWA'];
+          const altSubsHtml = altServiceNames.map(s =>
+            `<label style="${lStyle}"><input type="checkbox" class="b-alt-sub-cb" value="${s}" onchange="checkBStep1()" style="${cbStyle}"><span>${s}</span></label>`
+          ).join('');
+          area.innerHTML = `
+            <div class="step-indicator">ステップ 1 / 3</div>
+            <h1>解約理由をお聞かせください</h1>
+            <p style="margin-bottom:16px;">当てはまるものをすべてお選びください（1つ以上必須）</p>
+            <div style="text-align:left;margin-bottom:20px;">
+              ${normalHtml}
+              <label style="${lStyle}">
+                <input type="checkbox" id="b-alt-service" class="b-main-cb"
+                       value="もっと好みに合う他の音楽配信サービスを見つけた"
+                       onchange="toggleBAltService(this)" style="${cbStyle}">
+                <span>もっと好みに合う他の音楽配信サービスを見つけた</span>
+              </label>
+              <div id="alt-subs" style="display:none;padding-left:26px;margin-top:4px;margin-bottom:8px;border-left:2px solid #333;">
+                ${altSubsHtml}
+                <label style="${lStyle}">
+                  <input type="checkbox" id="b-alt-other-cb" class="b-alt-sub-cb" value="その他"
+                         onchange="toggleBAltOther(this)" style="${cbStyle}">
+                  <span>その他（以下に具体的にご記入ください）</span>
+                </label>
+                <div id="b-alt-other-wrap" style="display:none;margin-top:6px;margin-bottom:8px;">
+                  <input id="b-alt-other-input" type="text" oninput="checkBStep1()" placeholder="サービス名を入力"
+                         style="width:100%;background:#282828;border:none;color:white;padding:8px 12px;border-radius:4px;font-size:13px;box-sizing:border-box;">
+                </div>
+              </div>
+              <label style="${lStyle}">
+                <input type="checkbox" id="b-other-reason" class="b-main-cb"
+                       value="その他（上記のいずれの理由にも当てはまらない）"
+                       onchange="toggleBOtherReason(this)" style="${cbStyle}">
+                <span>その他（上記のいずれの理由にも当てはまらない）</span>
+              </label>
+              <div id="b-other-wrap" style="display:none;margin-top:6px;margin-bottom:8px;">
+                <textarea id="b-other-ta" rows="3" oninput="checkBStep1()" placeholder="10文字以上入力してください"
+                          style="width:100%;background:#282828;border:none;color:white;padding:12px;border-radius:4px;resize:none;font-size:13px;box-sizing:border-box;margin-bottom:4px;"></textarea>
+                <div id="b-other-hint" style="font-size:11px;color:#727272;">0 / 10文字以上</div>
+              </div>
+            </div>
+            <button id="next-btn-b" class="btn btn-outline" disabled onclick="advanceBStep1()"
+                    style="opacity:0.4;cursor:not-allowed;">次へ進む</button>
+          `;
+        } else if (currentStep === 2) {
+          area.innerHTML = `
+            <div class="step-indicator">ステップ 2 / 3</div>
+            <h1>解約に関する重要事項</h1>
+            <p style="margin-bottom:12px;font-size:13px;">以下の内容を最後までお読みください。</p>
+            <div id="terms-box" onscroll="checkBScroll()"
+                 style="height:280px;overflow-y:scroll;background:#1e1e1e;border-radius:6px;
+                        padding:16px;text-align:left;font-size:12px;line-height:1.9;color:#ccc;
+                        margin-bottom:16px;-webkit-overflow-scrolling:touch;">
+              <strong style="color:#fff;font-size:14px;display:block;margin-bottom:12px;">SoundFlow プレミアムプラン解約における重要事項説明</strong>
+              本手続きを完了すると、SoundFlowプレミアムプラン（以下、本サービス）の解約処理が行われ、次回更新日以降は無料プラン（Freeプラン）へと自動的に移行します。手続きの前に、以下の注意事項を必ず最後までお読みください。<br><br>
+              <strong style="color:#fff;">1. 解約後の楽曲再生について</strong><br>
+              解約手続き完了後も、現在の請求サイクルの終了日（${deadlineStr}）までは引き続きプレミアムプランの機能をご利用いただけます。期間終了後は自動的に広告付きのFreeプランに切り替わり、一部の機能が制限されます。<br><br>
+              <strong style="color:#fff;">2. オフライン再生およびダウンロード楽曲の削除</strong><br>
+              Freeプランへの移行に伴い、これまで端末にダウンロードした楽曲のオフライン再生は一切ご利用いただけなくなります。保存された音声データは端末のストレージから順次自動消去されますので、通信量にご注意ください。<br><br>
+              <strong style="color:#fff;">3. 音質制限について</strong><br>
+              プレミアムプランで提供されていた最高音質（320kbps）での再生はご利用いただけなくなります。Freeプランでは標準音質（160kbps）または低音質（96kbps）に固定され、ネットワーク環境に応じて自動調整されます。<br><br>
+              <strong style="color:#fff;">4. ファミリープラン・学生割引の再登録制限</strong><br>
+              現在、学生割引プランまたはファミリープランをご利用の場合、一度解約すると再登録時に再度認証手続き（在籍証明書の提出や家族の招待リンクの再発行など）が必要となります。また、キャンペーン等による特別料金での再登録はできません。<br><br>
+              <strong style="color:#fff;">5. 返金および日割り計算の不適用</strong><br>
+              契約期間の途中で解約された場合であっても、月額料金の日割り計算による返金、および月途中の解約に伴う清算は一切行われません。あらかじめご了承ください。<br><br>
+              <strong style="color:#fff;">6. サードパーティ製デバイスとの連携解除</strong><br>
+              スマートスピーカーや車載ナビゲーションシステムなど、一部の外部連携デバイスにおける「オンデマンド再生（曲を選んで再生する機能）」はご利用いただけなくなり、シャッフル再生のみとなります。
+              <div id="terms-bottom" style="height:1px;margin-top:20px;"></div>
+            </div>
+            <button id="terms-confirm-btn" class="btn btn-outline" disabled onclick="nextStep()"
+                    style="opacity:0.4;cursor:not-allowed;">最後までお読みください</button>
+          `;
+        } else {
+          area.innerHTML = `
+            <div class="step-indicator">ステップ 3 / 3</div>
+            <h1 style="margin-bottom:12px;">最終確認</h1>
+            <p style="font-size:13px;text-align:left;">
+              SoundFlowプレミアムプランの解約処理を実行します。<br><br>
+              ※「解約を確定する」ボタンを押すことで手続きが正式に完了し、次回更新日（${deadlineStr}）以降は自動的に無料プランへ移行します。<br><br>
+              ※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。
+            </p>
+            <button class="btn btn-outline"
+              onclick="finishExp('cancel',{checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
+              解約を確定する
+            </button>
+            <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">
+              解約せずにマイページに戻る
+            </button>
+          `;
+        }
+      } else if (cond === 'D') {
+        // 条件D: 感情的引き留め（損失回避・罪悪感）
+        area.innerHTML = `
+          <h1>解約の確認</h1>
+          <div style="background:#1a1a1a; border-radius:8px; padding:16px; margin-bottom:20px; text-align:left; font-size:13px; line-height:1.9;">
+            <div style="margin-bottom:6px; color:#b3b3b3; font-size:12px;">${nextDayStr}以降はFreeプランへ強制移行となり、以下の機能制限が適用されます。</div>
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #2a2a2a;">
+              <div style="font-weight:bold; margin-bottom:4px;">🚫 オフライン再生権限の完全喪失</div>
+              <div style="color:#b3b3b3; font-size:12px;">あなたがこれまでにダウンロードした<strong style="color:#ffffff;">80曲</strong>が削除され、復元することはできません。</div>
+            </div>
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #2a2a2a;">
+              <div style="font-weight:bold; margin-bottom:4px;">🚫 シャッフル再生のみ</div>
+              <div style="color:#b3b3b3; font-size:12px;">聴きたい曲をピンポイントで選んで再生することができなくなります。</div>
+            </div>
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #2a2a2a;">
+              <div style="font-weight:bold; margin-bottom:4px;">🚫 曲のスキップ回数制限の適用</div>
+              <div style="color:#b3b3b3; font-size:12px;">スキップは<strong style="color:#ffffff;">1時間に6回まで</strong>に制限されます。</div>
+            </div>
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #2a2a2a;">
+              <div style="font-weight:bold; margin-bottom:4px;">🚫 広告による中断</div>
+              <div style="color:#b3b3b3; font-size:12px;">数曲ごとにスキップ不可能な音声広告が強制的に流れます。</div>
+            </div>
+            <div>
+              <div style="font-weight:bold; margin-bottom:4px;">🚫 蓄積されたAIレコメンドデータのリセット</div>
+              <div style="color:#b3b3b3; font-size:12px;">あなたの好みを学習したデータが削除され、おすすめ機能の精度が低下します。</div>
+            </div>
+          </div>
+          <p style="color:#e91429; font-weight:bold; margin-bottom:20px;">⚠ 本当によろしいですか？</p>
+          <button class="btn btn-outline" onclick="finishExp('cancel')">はい、すべての特典を放棄して解約します</button>
+          <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">いいえ、快適な音楽体験を維持します</button>
+        `;
+      } else if (cond === 'C') {
+        // 条件C: 視覚的誘導（インターフェース干渉）
+        area.innerHTML = `
+          <h1>解約の確認</h1>
+          <p style="margin-bottom:16px;">解約後も<strong>${deadlineStr}</strong>までは特典を利用可能です。</p>
+          <div style="background:#1a1a1a; border-radius:8px; padding:16px; margin-bottom:24px; text-align:left;">
+            <div style="font-size:13px; color:#b3b3b3; margin-bottom:8px;">現在のプラン</div>
+            <div style="font-size:16px; font-weight:bold; margin-bottom:12px;">プレミアム個人（¥980 / 月）</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">広告なし</span>
+              <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">オンデマンド再生</span>
+              <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">高音質ストリーミング</span>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-primary-textonly" style="margin-bottom:12px;" onclick="finishExp('keep')">現在のプランを維持</button>
+          <button class="deceptive-link" onclick="finishExp('cancel', {})">解約を確定</button>
+        `;
+      }
+    }
+
+    // 条件B Step1: 特殊チェックボックスのトグル
+    function toggleBAltService(cb) {
+      document.getElementById('alt-subs').style.display = cb.checked ? 'block' : 'none';
+      if (!cb.checked) {
+        document.querySelectorAll('#alt-subs input[type=checkbox]').forEach(el => el.checked = false);
+        document.getElementById('b-alt-other-wrap').style.display = 'none';
+        const inp = document.getElementById('b-alt-other-input');
+        if (inp) inp.value = '';
+      }
+      checkBStep1();
+    }
+    function toggleBAltOther(cb) {
+      document.getElementById('b-alt-other-wrap').style.display = cb.checked ? 'block' : 'none';
+      checkBStep1();
+    }
+    function toggleBOtherReason(cb) {
+      document.getElementById('b-other-wrap').style.display = cb.checked ? 'block' : 'none';
+      checkBStep1();
+    }
+    function checkBStep1() {
+      if ([...document.querySelectorAll('.b-main-cb:checked')].length === 0) { setBNextBtnB(false); return; }
+      const altCb = document.getElementById('b-alt-service');
+      if (altCb && altCb.checked) {
+        const altSubs = [...document.querySelectorAll('.b-alt-sub-cb:checked')];
+        if (altSubs.length === 0) { setBNextBtnB(false); return; }
+        const altOtherCb = document.getElementById('b-alt-other-cb');
+        if (altOtherCb && altOtherCb.checked) {
+          const inp = document.getElementById('b-alt-other-input');
+          if (!inp || inp.value.trim().length < 1) { setBNextBtnB(false); return; }
+        }
+      }
+      const otherCb = document.getElementById('b-other-reason');
+      if (otherCb && otherCb.checked) {
+        const ta = document.getElementById('b-other-ta');
+        const hint = document.getElementById('b-other-hint');
+        const len = ta ? ta.value.length : 0;
+        if (hint) hint.textContent = `${len} / 10文字以上`;
+        if (len < 10) { setBNextBtnB(false); return; }
+      }
+      setBNextBtnB(true);
+    }
+    function setBNextBtnB(ok) {
+      const btn = document.getElementById('next-btn-b');
+      if (!btn) return;
+      btn.disabled = !ok;
+      btn.style.opacity = ok ? '1' : '0.4';
+      btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+    }
+    function advanceBStep1() {
+      bReasons = [...document.querySelectorAll('.b-main-cb:checked')].map(el => el.value);
+      bAltServices = [];
+      const altCb = document.getElementById('b-alt-service');
+      if (altCb && altCb.checked) {
+        [...document.querySelectorAll('.b-alt-sub-cb:checked')].forEach(el => {
+          if (el.value !== 'その他') bAltServices.push(el.value);
+        });
+        const inp = document.getElementById('b-alt-other-input');
+        if (inp && inp.value.trim()) bAltServices.push('その他: ' + inp.value.trim());
+      }
+      const ta = document.getElementById('b-other-ta');
+      bFreeText = ta ? ta.value : '';
+      nextStep();
+    }
+    // 条件B Step2: スクロール検知
+    function checkBScroll() {
+      const box = document.getElementById('terms-box');
+      const btn = document.getElementById('terms-confirm-btn');
+      if (!box || !btn) return;
+      if (box.scrollTop + box.clientHeight >= box.scrollHeight - 5) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.textContent = '確認しました';
+      }
+    }
+
+    function nextStep() {
+      currentStep++;
+      renderStep();
+    }
+
+    // 条件Dのチェックボックス検証
+    function checkboxChanged() {
+      const checked = document.querySelectorAll('#content-area input[type=checkbox]:checked');
+      document.getElementById('next-btn-d').disabled = checked.length === 0;
+    }
+
+    // 条件D: チェックボックス確定→最終確認ステップへ
+    function advanceDStep() {
+      const checked = [...document.querySelectorAll('#content-area input[type=checkbox]:checked')];
+      selectedReasons = checked.map(el => el.value);
+      nextStep();
+    }
+
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx0DzAQKBP8XJ-FdZsTkxhTxxXeAMoSGLFVZXN-wKtgXktoClIa_rRfXU2V0YihouUY/exec';
+
+    // 手続き完了・データ記録
+    function finishExp(decision, extra = {}) {
+      endTime = Date.now();
+      active = false;
+      const timeElapsed = endTime - startTime;
+
+      document.getElementById('screen-main').classList.add('hidden');
+
+      // リザルト表示用テキスト
+      let displayData = `Condition: ${cond}\nDecision: ${decision}\nTime: ${timeElapsed}ms\nMouse: ${Math.round(mouseDistance)}px`;
+      if (extra.checkedCount !== undefined) {
+        displayData += `\nChecked: ${extra.checkedCount}`;
+        displayData += `\nItems:\n  ${extra.checkedItems.join('\n  ')}`;
+      }
+      if (extra.altServices && extra.altServices.length > 0)
+        displayData += `\nAltServices: ${extra.altServices.join(' / ')}`;
+      if (extra.freeText)
+        displayData += `\nFreeText: ${extra.freeText}`;
+      document.getElementById('data-display').innerText = displayData;
+      console.log("Result:", displayData);
+
+      // スプレッドシートへ送信
+      const payload = {
+        condition:    cond,
+        decision:     decision,
+        time:         timeElapsed,
+        mouse:        Math.round(mouseDistance),
+        checkedCount: extra.checkedCount ?? null,
+        checkedItems: extra.checkedItems ? extra.checkedItems.join(' / ') : null,
+        altServices:  extra.altServices ? extra.altServices.join(' / ') : null,
+        freeText:     extra.freeText ?? null
+      };
+      fetch(GAS_URL, {
+        method:  'POST',
+        mode:    'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      }).catch(err => console.warn('送信エラー:', err));
+
+      renderEndScreen(decision);
+    }
+
+    function submitSurvey(decCode) {
+      const get = name => {
+        const el = document.querySelector(`input[name="${name}"]:checked`);
+        return el ? el.value : null;
+      };
+      const q1 = get('q1'), q2 = get('q2'), q3 = get('q3'), q4 = get('q4');
+      const q5 = (document.getElementById('survey-q5') || {}).value || '';
+      const msg = document.getElementById('survey-msg');
+
+      if (!q1 || !q2 || !q3 || !q4) {
+        msg.style.color = '#e91429';
+        msg.textContent = '※ ①〜④はすべて選択してください';
+        return;
+      }
+      msg.style.color = '#b3b3b3';
+      msg.textContent = '送信中...';
+
+      fetch(GAS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'survey', condition: cond, decision: decCode, q1, q2, q3, q4, q5 })
+      }).then(() => {
+        msg.style.color = '#1DB954';
+        msg.textContent = '✓ 送信しました。下にスクロールすると正常に解約できたか確認できます。';
+        document.querySelector('#survey-form button[onclick]') && (document.querySelector('#survey-form button[onclick]').disabled = true);
+        const reveal = document.getElementById('mypage-reveal');
+        if (reveal) reveal.style.display = 'block';
+      }).catch(() => {
+        msg.style.color = '#e91429';
+        msg.textContent = '送信に失敗しました。もう一度お試しください。';
+      });
+    }
+
+    function renderEndScreen(decision) {
+      const el = document.getElementById('screen-end');
+      el.classList.remove('hidden');
+      const decCode = decision === 'cancel' ? '0' : '1';
+
+      const lStyle = 'display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;';
+      const rbStyle = 'flex-shrink:0;';
+
+      function likert(name, lo, hi) {
+        return [1,2,3,4,5].map(v => `
+          <label style="display:flex;flex-direction:column;align-items:center;gap:4px;
+                         font-size:11px;color:#5f6368;cursor:pointer;flex:1;">
+            <input type="radio" name="${name}" value="${v}" style="${rbStyle}">
+            ${v === 1 ? lo : v === 5 ? hi : v}
+          </label>`).join('');
+      }
+
+      const cardStyle = 'background:#ffffff;border-radius:8px;padding:20px 24px;margin-bottom:12px;box-shadow:0 1px 2px rgba(60,64,67,0.15),0 1px 3px 1px rgba(60,64,67,0.1);';
+      const qLabel = 'display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:#202124;margin-bottom:10px;';
+
+      const surveyBlock = `
+        <div id="survey-form" style="margin-top:24px;background:#f1f8e9;padding:20px;border-radius:12px;text-align:left;">
+
+          <div style="background:#ffffff;border-radius:8px;padding:20px 24px;margin-bottom:12px;border-top:8px solid #1DB954;box-shadow:0 1px 2px rgba(60,64,67,0.15);">
+            <p style="font-size:18px;color:#202124;font-weight:400;margin-bottom:6px;">アンケート</p>
+            <p style="font-size:13px;color:#5f6368;margin-bottom:0;">所要時間：約1分</p>
+          </div>
+
+          <div style="${cardStyle}">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>① あなたは先ほどの画面で、解約手続きが正常に完了できましたか？</strong><span style="color:#c5221f;"> *</span>
+            </p>
+            <label style="${qLabel}">
+              <input type="radio" name="q1" value="はい" style="${rbStyle}"> はい（解約できた）
+            </label>
+            <label style="${qLabel}margin-bottom:0;">
+              <input type="radio" name="q1" value="いいえ" style="${rbStyle}"> いいえ（解約できなかった）
+            </label>
+          </div>
+
+          <div style="${cardStyle}">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>② 今回の解約手続きにおいて、どの程度スムーズに操作が進められたと感じましたか？</strong><span style="color:#c5221f;"> *</span>
+            </p>
+            <div style="display:flex;gap:4px;justify-content:space-between;">
+              ${likert('q2','1 強い不快感や迷いを感じた','5 スムーズに進められた')}
+            </div>
+          </div>
+
+          <div style="${cardStyle}">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>③ このサービスを運営する事業者に対して、どの程度信頼感を持てましたか？</strong><span style="color:#c5221f;"> *</span>
+            </p>
+            <div style="display:flex;gap:4px;justify-content:space-between;">
+              ${likert('q3','1 強い不信感を抱いた','5 非常に信頼できる')}
+            </div>
+          </div>
+
+          <div style="${cardStyle}">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>④ 料金が見直されるなど改善があった場合、このサービスを再度利用したいと思いますか？</strong><span style="color:#c5221f;"> *</span>
+            </p>
+            <div style="display:flex;gap:4px;justify-content:space-between;">
+              ${likert('q4','1 二度と利用したくない','5 再度利用したい')}
+            </div>
+          </div>
+
+          <div style="${cardStyle}margin-bottom:16px;">
+            <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
+              <strong>⑤ 今回の操作で印象に残った点・不快に感じた点があれば自由にご記入ください（任意）</strong>
+            </p>
+            <textarea id="survey-q5" rows="3" placeholder="自由にご記入ください"
+              style="width:100%;background:#ffffff;border:none;border-bottom:1px solid #dadce0;color:#202124;
+                     padding:4px 0;resize:none;font-size:13px;box-sizing:border-box;outline:none;"></textarea>
+          </div>
+
+          <button onclick="submitSurvey('${decCode}')"
+            style="width:100%;padding:14px;border-radius:4px;border:none;
+                   background:#1DB954;color:#ffffff;font-weight:bold;font-size:15px;cursor:pointer;">
+            送信する
+          </button>
+          <p id="survey-msg" style="font-size:12px;color:#5f6368;margin-top:10px;text-align:center;"></p>
+        </div>
+      `;
+
+      // 送信後に開示するマイページ（decision でバッジを切り替え）
+      const isCancelled = decision === 'cancel';
+      const badgeText  = isCancelled ? '解約済み' : '継続中';
+      const badgeColor = isCancelled ? '#e91429'  : '#1DB954';
+      const badgeTextColor = '#ffffff';
+      const planDateLine = isCancelled
+        ? `<div style="font-size:12px; color:#b3b3b3; margin-top:8px;">ご利用終了日：${deadlineStr}</div>`
+        : `<div style="font-size:12px; color:#b3b3b3; margin-top:8px;">次回更新日：2026年5月16日</div>`;
+
+      const myPageHtml = `
+        <div id="mypage-reveal" style="display:none; background:#121212; margin-top:24px; border-radius:8px; overflow:hidden;">
+
+          <!-- ヘッダー -->
+          <div style="background:#121212; padding:16px 20px; display:flex;
+                      align-items:center; border-bottom:1px solid #282828;">
+            <span style="font-size:18px; font-weight:bold; color:#1DB954; letter-spacing:1px;">SoundFlow</span>
+          </div>
+
+          <!-- プロフィール -->
+          <div style="padding:28px 20px 20px; display:flex; align-items:center; gap:16px;">
+            <div style="width:64px; height:64px; border-radius:50%; background:#535353;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:26px; color:#b3b3b3; flex-shrink:0;">👤</div>
+            <div>
+              <div style="font-size:18px; font-weight:bold;">田中 実験</div>
+              <div style="font-size:13px; color:#b3b3b3;">tanaka.jikken@example.com</div>
+            </div>
+          </div>
+
+          <!-- プラン情報 -->
+          <div style="margin:0 16px 16px; background:#282828; border-radius:8px; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-size:14px; font-weight:bold;">現在のプラン</span>
+              <span style="background:${badgeColor}; color:${badgeTextColor}; font-size:11px; font-weight:bold;
+                           padding:3px 10px; border-radius:500px;">${badgeText}</span>
+            </div>
+            <div style="font-size:20px; font-weight:bold; margin-bottom:4px;">プレミアム個人</div>
+            <div style="font-size:13px; color:#b3b3b3;">¥980 / 月</div>
+            ${planDateLine}
+          </div>
+
+          <!-- メニューリスト -->
+          ${[
+            ['👤', 'プロフィールの編集'],
+            ['💳', 'お支払い情報'],
+            ['🔔', '通知の設定'],
+            ['📱', 'デバイス管理'],
+            ['🔒', 'プライバシー設定'],
+            ['❓', 'ヘルプとサポート'],
+          ].map(([icon, label]) => `
+            <div style="display:flex; align-items:center; gap:14px; padding:16px 20px;
+                        border-bottom:1px solid #282828; color:#fff; font-size:14px;">
+              <span style="font-size:18px;">${icon}</span>
+              <span>${label}</span>
+              <span style="margin-left:auto; color:#535353; font-size:18px;">›</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // cancel / keep 共通の中立終了画面
+      el.className = 'screen';
+      el.style.maxWidth = '730px';
+      el.innerHTML = `
+        <button onclick="document.getElementById('secret-result').classList.toggle('hidden')"
+          style="background:#2e2e2e; border:none; color:#2e2e2e; width:12px; height:12px;
+                 border-radius:2px; cursor:pointer; padding:0; float:right;">■</button>
+        <p style="margin-bottom:8px;">お手続きありがとうございました。以上でシミュレーションは終了です。</p>
+        <p>引き続き、画面の指示に従ってアンケートの回答にご協力をお願いいたします。</p>
+        ${surveyBlock}
+        ${myPageHtml}
+      `;
+    }
+
+    // Shift + R で隠しリザルトを表示
+    document.addEventListener('keydown', e => {
+      if (e.shiftKey && e.key === 'R') {
+        document.getElementById('secret-result').classList.toggle('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
