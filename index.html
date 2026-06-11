@@ -36,18 +36,21 @@
     .btn {
       display: block; width: 100%; padding: 14px;
       border-radius: 500px; border: none; font-weight: bold;
-      font-size: 16px; cursor: pointer; transition: background-color 0.15s, color 0.15s, transform 0.2s;
+      font-size: 16px; cursor: pointer; transition: filter 0.15s, background-color 0.15s, color 0.15s, transform 0.2s;
     }
     .btn:active { transform: scale(0.98); }
     .btn-primary { background-color: var(--primary-color); color: black; }
-    .btn-primary:hover { background-color: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
-    .btn-primary-textonly:hover { background-color: var(--primary-color); color: white; border: none; }
+    .btn-primary:hover { filter: brightness(1.15); }
+    .btn-primary-textonly:hover { filter: brightness(1.15); }
     .btn-cancel-a { background: white; color: black; }
-    .btn-cancel-a:hover { background-color: #e91429; color: white; }
+    .btn-cancel-a:hover { filter: brightness(1.05); }
+    #btn-confirm-cancel:hover { filter: none; background-color: #e91429; color: white; }
     .btn-keep-a { background: black; color: white; border: 1px solid #727272; margin-top: 12px; }
-    .btn-keep-a:hover { background: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
+    .btn-keep-a:hover { filter: brightness(1.4); }
     .btn-outline { background: transparent; color: white; border: 1px solid #727272; margin-top: 12px; }
-    .btn-outline:hover { background: white; color: black; border-color: white; }
+    .btn-outline:hover { filter: brightness(1.4); }
+    .btn-cancel-b { background: #d8d8d8; color: black; border: none; }
+    .btn-cancel-b:hover { filter: none; background: #ffffff; }
 
     .hidden { display: none !important; }
     .step-indicator { color: var(--text-sub); font-size: 12px; margin-bottom: 10px; }
@@ -133,7 +136,7 @@
     <div class="screen" style="max-width:340px;padding:32px 24px;">
       <h1 style="font-size:18px;margin-bottom:12px;">解約を確定しますか？</h1>
       <p style="margin-bottom:24px;">この操作は取り消せません。</p>
-      <button class="btn btn-cancel-a" onclick="confirmCancel()">はい、解約します</button>
+      <button class="btn btn-cancel-a" id="btn-confirm-cancel" onclick="confirmCancel()">はい、解約します</button>
       <button class="btn btn-keep-a" onclick="dismissCancel()">いいえ、戻る</button>
     </div>
   </div>
@@ -206,6 +209,7 @@
 
     // 条件に合わせた画面の中身を作る
     function renderStep() {
+      window.scrollTo(0, 0);
       const area = document.getElementById('content-area');
       
       if (cond === 'A') {
@@ -222,7 +226,7 @@
               <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">高音質ストリーミング</span>
             </div>
           </div>
-          <button class="btn btn-cancel-a" onclick="showCancelConfirm()">解約を確定する</button>
+          <button class="btn btn-cancel-b" onclick="showCancelConfirm()">解約手続きを続行</button>
           <button class="btn btn-keep-a" onclick="finishExp('keep')">解約せずに戻る</button>
         `;
       } else if (cond === 'B') {
@@ -290,7 +294,7 @@
                 <div id="b-other-hint" style="font-size:11px;color:#727272;">0 / 10文字以上</div>
               </div>
             </div>
-            <button id="next-btn-b" class="btn btn-outline" disabled onclick="advanceBStep1()"
+            <button id="next-btn-b" class="btn btn-cancel-b" disabled onclick="advanceBStep1()"
                     style="opacity:0.4;cursor:not-allowed;">次へ進む</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
           `;
@@ -319,7 +323,7 @@
               スマートスピーカーや車載ナビゲーションシステムなど、一部の外部連携デバイスにおける「オンデマンド再生（曲を選んで再生する機能）」はご利用いただけなくなり、シャッフル再生のみとなります。
               <div id="terms-bottom" style="height:1px;margin-top:20px;"></div>
             </div>
-            <button id="terms-confirm-btn" class="btn btn-outline" disabled onclick="nextStep()"
+            <button id="terms-confirm-btn" class="btn btn-cancel-b" disabled onclick="nextStep()"
                     style="opacity:0.4;cursor:not-allowed;">最後までお読みください</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="prevStep()">戻る（ステップ1へ）</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
@@ -331,9 +335,9 @@
             <p style="font-size:13px;text-align:left;">
               SoundFlowプレミアムプランの解約処理を実行します。<br><br>
               ※「解約を確定する」ボタンを押すことで手続きが正式に完了し、次回更新日（${deadlineStr}）以降は自動的に無料プランへ移行します。<br><br>
-              ※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。
+              <span style="color:#e91429;">※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。</span>
             </p>
-            <button class="btn btn-outline"
+            <button class="btn btn-cancel-b"
               onclick="showCancelConfirm({checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
               解約を確定する
             </button>
@@ -389,7 +393,7 @@
             </div>
           </div>
           <button class="btn btn-primary btn-primary-textonly" style="margin-bottom:12px;" onclick="finishExp('keep')">現在のプランを維持</button>
-          <button class="deceptive-link" onclick="showCancelConfirm()">解約を確定</button>
+          <button class="deceptive-link" style="text-decoration:none;" onclick="showCancelConfirm()">解約手続きを続行</button>
         `;
       }
     }
@@ -478,7 +482,7 @@
     // 条件Dのチェックボックス検証
     function checkboxChanged() {
       const checked = document.querySelectorAll('#content-area input[type=checkbox]:checked');
-      document.getElementById('next-btn-d').disabled = checked.length === 0;
+      document.getElementById('next-btn-d').disabled = checked.length === 0;  
     }
 
     // 条件D: チェックボックス確定→最終確認ステップへ
@@ -497,7 +501,6 @@
       const timeElapsed = endTime - startTime;
 
       document.getElementById('screen-main').classList.add('hidden');
-
 
       // スプレッドシートへ送信
       const payload = {
@@ -580,51 +583,35 @@
 
       const surveyBlock = `
         <div id="survey-form" style="margin-top:24px;background:#f1f8e9;padding:20px;border-radius:12px;text-align:left;">
-
           <div style="background:#ffffff;border-radius:8px;padding:20px 24px;margin-bottom:12px;border-top:8px solid #1DB954;box-shadow:0 1px 2px rgba(60,64,67,0.15);">
             <p style="font-size:18px;color:#202124;font-weight:400;margin-bottom:6px;">アンケート</p>
             <p style="font-size:13px;color:#5f6368;margin-bottom:0;">所要時間：約1分</p>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>① あなたは先ほどの画面で、解約手続きが正常に完了できましたか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <label style="${qLabel}">
-              <input type="radio" name="q1" value="はい" style="${rbStyle}"> はい（解約できた）
-            </label>
-            <label style="${qLabel}margin-bottom:0;">
-              <input type="radio" name="q1" value="いいえ" style="${rbStyle}"> いいえ（解約できなかった）
-            </label>
+            <label style="${qLabel}"><input type="radio" name="q1" value="はい" style="${rbStyle}"> はい（解約できた）</label>
+            <label style="${qLabel}margin-bottom:0;"><input type="radio" name="q1" value="いいえ" style="${rbStyle}"> いいえ（解約できなかった）</label>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>② 今回の解約手続きにおいて、どの程度スムーズに操作が進められたと感じましたか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <div style="display:flex;gap:4px;justify-content:space-between;">
-              ${likert('q2','1 強い不快感や迷いを感じた','5 スムーズに進められた')}
-            </div>
+            <div style="display:flex;gap:4px;justify-content:space-between;">${likert('q2','1 強い不快感や迷いを感じた','5 スムーズに進められた')}</div>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>③ このサービスを運営する事業者に対して、どの程度信頼感を持てましたか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <div style="display:flex;gap:4px;justify-content:space-between;">
-              ${likert('q3','1 強い不信感を抱いた','5 非常に信頼できる')}
-            </div>
+            <div style="display:flex;gap:4px;justify-content:space-between;">${likert('q3','1 強い不信感を抱いた','5 非常に信頼できる')}</div>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>④ 料金が見直されるなど改善があった場合、このサービスを再度利用したいと思いますか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <div style="display:flex;gap:4px;justify-content:space-between;">
-              ${likert('q4','1 二度と利用したくない','5 再度利用したい')}
-            </div>
+            <div style="display:flex;gap:4px;justify-content:space-between;">${likert('q4','1 二度と利用したくない','5 再度利用したい')}</div>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑤ 今回の操作で印象に残った点・不快に感じた点があれば自由にご記入ください（任意）</strong>
@@ -633,7 +620,6 @@
               style="width:100%;background:#ffffff;border:none;border-bottom:1px solid #dadce0;color:#202124;
                      padding:4px 0;resize:none;font-size:13px;box-sizing:border-box;outline:none;"></textarea>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑥ 年齢をご記入ください（任意）</strong>
@@ -642,17 +628,12 @@
               style="width:100px;background:#ffffff;border:none;border-bottom:1px solid #dadce0;
                      color:#202124;padding:4px 0;font-size:13px;outline:none;">
           </div>
-
           <div style="${cardStyle}margin-bottom:16px;">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑦ 性別をお選びください（任意）</strong>
             </p>
-            ${['男','女','その他','回答しない'].map(v => `
-              <label style="${qLabel}">
-                <input type="radio" name="gender" value="${v}" style="${rbStyle}"> ${v}
-              </label>`).join('')}
+            ${['男','女','その他','回答しない'].map(v => `<label style="${qLabel}"><input type="radio" name="gender" value="${v}" style="${rbStyle}"> ${v}</label>`).join('')}
           </div>
-
           <button onclick="submitSurvey('${decCode}')"
             style="width:100%;padding:14px;border-radius:4px;border:none;
                    background:#1DB954;color:#ffffff;font-weight:bold;font-size:15px;cursor:pointer;">
@@ -662,7 +643,6 @@
         </div>
       `;
 
-      // 送信後に開示するマイページ（decision でバッジを切り替え）
       const isCancelled = decision === 'cancel';
       const badgeText  = isCancelled ? '解約済み' : '継続中';
       const badgeColor = isCancelled ? '#e91429'  : '#1DB954';
@@ -673,14 +653,9 @@
 
       const myPageHtml = `
         <div id="mypage-reveal" style="display:none; background:#121212; margin-top:24px; border-radius:8px; overflow:hidden;">
-
-          <!-- ヘッダー -->
-          <div style="background:#121212; padding:16px 20px; display:flex;
-                      align-items:center; border-bottom:1px solid #282828;">
+          <div style="background:#121212; padding:16px 20px; display:flex; align-items:center; border-bottom:1px solid #282828;">
             <span style="font-size:18px; font-weight:bold; color:#1DB954; letter-spacing:1px;">SoundFlow</span>
           </div>
-
-          <!-- プロフィール -->
           <div style="padding:28px 20px 20px; display:flex; align-items:center; gap:16px;">
             <div style="width:64px; height:64px; border-radius:50%; background:#535353;
                         display:flex; align-items:center; justify-content:center;
@@ -690,8 +665,6 @@
               <div style="font-size:13px; color:#b3b3b3;">tanaka.jikken@example.com</div>
             </div>
           </div>
-
-          <!-- プラン情報 -->
           <div style="margin:0 16px 16px; background:#282828; border-radius:8px; padding:18px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
               <span style="font-size:14px; font-weight:bold;">現在のプラン</span>
@@ -702,8 +675,6 @@
             <div style="font-size:13px; color:#b3b3b3;">¥980 / 月</div>
             ${planDateLine}
           </div>
-
-          <!-- メニューリスト -->
           ${[
             ['👤', 'プロフィールの編集'],
             ['💳', 'お支払い情報'],
@@ -714,15 +685,13 @@
           ].map(([icon, label]) => `
             <div style="display:flex; align-items:center; gap:14px; padding:16px 20px;
                         border-bottom:1px solid #282828; color:#fff; font-size:14px;">
-              <span style="font-size:18px;">${icon}</span>
-              <span>${label}</span>
+              <span style="font-size:18px;">${icon}</span><span>${label}</span>
               <span style="margin-left:auto; color:#535353; font-size:18px;">›</span>
             </div>
           `).join('')}
         </div>
       `;
 
-      // cancel / keep 共通の中立終了画面
       el.className = 'screen';
       el.style.maxWidth = '730px';
       el.innerHTML = `
@@ -752,7 +721,6 @@
         btn.textContent = '✓ コピーしました！';
         setTimeout(() => { btn.textContent = '📋 URLをコピーする'; }, 2000);
       }).catch(() => {
-        // fallback
         const ta = document.createElement('textarea');
         ta.value = url;
         document.body.appendChild(ta);
@@ -770,7 +738,6 @@
       if (navigator.share) {
         navigator.share({ url: url }).catch(() => {});
       } else {
-        // Web Share API非対応の場合はクリップボードにコピー
         copyUrl();
       }
     }
