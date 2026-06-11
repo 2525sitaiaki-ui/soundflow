@@ -83,6 +83,32 @@
 </head>
 <body>
 
+  <!-- モバイル制限モーダル -->
+  <div id="mobile-block" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+       background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+    <div style="background:#1a1a1a; border-radius:12px; padding:32px 24px; max-width:360px; width:100%; text-align:center; border:1px solid #333;">
+      <div style="font-size:48px; margin-bottom:16px;">💻</div>
+      <h2 style="font-size:18px; color:#ffffff; margin-bottom:12px; line-height:1.5;">この実験はパソコンで<br>行うことを想定しています</h2>
+      <p style="font-size:13px; color:#b3b3b3; margin-bottom:24px; line-height:1.7;">
+        スマートフォン・タブレットからのアクセスが検出されました。<br>
+        PCのブラウザで下記のURLを開いてください。
+      </p>
+      <div style="background:#282828; border-radius:8px; padding:12px 14px; margin-bottom:16px; word-break:break-all;
+                  font-size:12px; color:#b3b3b3; text-align:left; border:1px solid #383838;" id="mobile-url-display"></div>
+      <button onclick="copyUrl()"
+              style="width:100%; padding:13px; border-radius:500px; border:none; background:#ffffff;
+                     color:#000000; font-weight:bold; font-size:14px; cursor:pointer; margin-bottom:10px;"
+              id="copy-btn">
+        📋 URLをコピーする
+      </button>
+      <button onclick="shareUrl()"
+              style="width:100%; padding:13px; border-radius:500px; border:none; background:#1DB954;
+                     color:#000000; font-weight:bold; font-size:14px; cursor:pointer;">
+        📤 URLをシェアする
+      </button>
+    </div>
+  </div>
+
   <div id="screen-start" class="screen">
     <h1 style="font-size:20px; margin-bottom:32px;">SoundFlow</h1>
     <button class="btn btn-primary" onclick="startExperiment()">解約手続きを開始する</button>
@@ -706,6 +732,51 @@
         ${myPageHtml}
       `;
     }
+
+    // モバイル検知
+    function checkMobile() {
+      const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const modal = document.getElementById('mobile-block');
+      if (isMobile) {
+        document.getElementById('mobile-url-display').textContent = window.location.href;
+        modal.style.display = 'flex';
+      } else {
+        modal.style.display = 'none';
+      }
+    }
+
+    function copyUrl() {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ コピーしました！';
+        setTimeout(() => { btn.textContent = '📋 URLをコピーする'; }, 2000);
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ コピーしました！';
+        setTimeout(() => { btn.textContent = '📋 URLをコピーする'; }, 2000);
+      });
+    }
+
+    function shareUrl() {
+      const url = window.location.href;
+      if (navigator.share) {
+        navigator.share({ url: url }).catch(() => {});
+      } else {
+        // Web Share API非対応の場合はクリップボードにコピー
+        copyUrl();
+      }
+    }
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
 
   </script>
 </body>
