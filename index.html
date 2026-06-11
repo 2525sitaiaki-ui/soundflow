@@ -36,18 +36,21 @@
     .btn {
       display: block; width: 100%; padding: 14px;
       border-radius: 500px; border: none; font-weight: bold;
-      font-size: 16px; cursor: pointer; transition: background-color 0.15s, color 0.15s, transform 0.2s;
+      font-size: 16px; cursor: pointer; transition: filter 0.15s, background-color 0.15s, color 0.15s, transform 0.2s;
     }
     .btn:active { transform: scale(0.98); }
     .btn-primary { background-color: var(--primary-color); color: black; }
-    .btn-primary:hover { background-color: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
-    .btn-primary-textonly:hover { background-color: var(--primary-color); color: white; border: none; }
+    .btn-primary:hover { filter: brightness(1.15); }
+    .btn-primary-textonly:hover { filter: brightness(1.15); }
     .btn-cancel-a { background: white; color: black; }
-    .btn-cancel-a:hover { background-color: #e91429; color: white; }
+    .btn-cancel-a:hover { filter: brightness(1.05); }
+    #btn-confirm-cancel:hover { filter: none; background-color: #e91429; color: white; }
     .btn-keep-a { background: black; color: white; border: 1px solid #727272; margin-top: 12px; }
-    .btn-keep-a:hover { background: black; color: var(--primary-color); border: 1px solid var(--primary-color); }
+    .btn-keep-a:hover { filter: brightness(1.4); }
     .btn-outline { background: transparent; color: white; border: 1px solid #727272; margin-top: 12px; }
-    .btn-outline:hover { background: white; color: black; border-color: white; }
+    .btn-outline:hover { filter: brightness(1.4); }
+    .btn-cancel-b { background: #d8d8d8; color: black; border: none; }
+    .btn-cancel-b:hover { filter: none; background: #ffffff; }
 
     .hidden { display: none !important; }
     .step-indicator { color: var(--text-sub); font-size: 12px; margin-bottom: 10px; }
@@ -107,7 +110,7 @@
     <div class="screen" style="max-width:340px;padding:32px 24px;">
       <h1 style="font-size:18px;margin-bottom:12px;">解約を確定しますか？</h1>
       <p style="margin-bottom:24px;">この操作は取り消せません。</p>
-      <button class="btn btn-cancel-a" onclick="confirmCancel()">はい、解約します</button>
+      <button class="btn btn-cancel-a" id="btn-confirm-cancel" onclick="confirmCancel()">はい、解約します</button>
       <button class="btn btn-keep-a" onclick="dismissCancel()">いいえ、戻る</button>
     </div>
   </div>
@@ -180,6 +183,7 @@
 
     // 条件に合わせた画面の中身を作る
     function renderStep() {
+      window.scrollTo(0, 0);
       const area = document.getElementById('content-area');
       
       if (cond === 'A') {
@@ -196,7 +200,7 @@
               <span style="background:#2a2a2a; border:1px solid #444; border-radius:4px; font-size:11px; padding:3px 8px; color:#b3b3b3;">高音質ストリーミング</span>
             </div>
           </div>
-          <button class="btn btn-cancel-a" onclick="showCancelConfirm()">解約を確定する</button>
+          <button class="btn btn-cancel-b" onclick="showCancelConfirm()">解約手続きを続行</button>
           <button class="btn btn-keep-a" onclick="finishExp('keep')">解約せずに戻る</button>
         `;
       } else if (cond === 'B') {
@@ -264,7 +268,7 @@
                 <div id="b-other-hint" style="font-size:11px;color:#727272;">0 / 10文字以上</div>
               </div>
             </div>
-            <button id="next-btn-b" class="btn btn-outline" disabled onclick="advanceBStep1()"
+            <button id="next-btn-b" class="btn btn-cancel-b" disabled onclick="advanceBStep1()"
                     style="opacity:0.4;cursor:not-allowed;">次へ進む</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
           `;
@@ -293,7 +297,7 @@
               スマートスピーカーや車載ナビゲーションシステムなど、一部の外部連携デバイスにおける「オンデマンド再生（曲を選んで再生する機能）」はご利用いただけなくなり、シャッフル再生のみとなります。
               <div id="terms-bottom" style="height:1px;margin-top:20px;"></div>
             </div>
-            <button id="terms-confirm-btn" class="btn btn-outline" disabled onclick="nextStep()"
+            <button id="terms-confirm-btn" class="btn btn-cancel-b" disabled onclick="nextStep()"
                     style="opacity:0.4;cursor:not-allowed;">最後までお読みください</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="prevStep()">戻る（ステップ1へ）</button>
             <button class="btn btn-outline" style="margin-top:12px;" onclick="finishExp('keep')">解約手続きを中止する</button>
@@ -305,9 +309,9 @@
             <p style="font-size:13px;text-align:left;">
               SoundFlowプレミアムプランの解約処理を実行します。<br><br>
               ※「解約を確定する」ボタンを押すことで手続きが正式に完了し、次回更新日（${deadlineStr}）以降は自動的に無料プランへ移行します。<br><br>
-              ※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。
+              <span style="color:#e91429;">※手続きの途中でブラウザを閉じたり、前の画面に戻ったりした場合、これまでの入力内容および同意内容はすべて破棄され、解約手続きは完了しませんのでご注意ください。</span>
             </p>
-            <button class="btn btn-outline"
+            <button class="btn btn-cancel-b"
               onclick="showCancelConfirm({checkedCount:bReasons.length,checkedItems:bReasons,altServices:bAltServices,freeText:bFreeText})">
               解約を確定する
             </button>
@@ -363,7 +367,7 @@
             </div>
           </div>
           <button class="btn btn-primary btn-primary-textonly" style="margin-bottom:12px;" onclick="finishExp('keep')">現在のプランを維持</button>
-          <button class="deceptive-link" onclick="showCancelConfirm()">解約を確定</button>
+          <button class="deceptive-link" style="text-decoration:none;" onclick="showCancelConfirm()">解約手続きを続行</button>
         `;
       }
     }
