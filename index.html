@@ -554,9 +554,9 @@
       const gender = get('gender');
       const msg = document.getElementById('survey-msg');
 
-      if (!q1 || !q2 || !q3 || !q4) {
+      if (!q1 || !q2 || !q3 || !q4 || !age || !gender) {
         msg.style.color = '#e91429';
-        msg.textContent = '※ ①〜④はすべて選択してください';
+        msg.textContent = '※ ①〜⑦はすべてご記入・ご選択ください';
         return;
       }
       msg.style.color = '#b3b3b3';
@@ -639,7 +639,7 @@
           </div>
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
-              <strong>⑥ 年齢をご記入ください（任意）</strong>
+              <strong>⑥ 年齢をご記入ください</strong><span style="color:#c5221f;"> *</span>
             </p>
             <input id="survey-age" type="number" min="0" max="120" placeholder="例：21"
               style="width:100px;background:#ffffff;border:none;border-bottom:1px solid #dadce0;
@@ -647,7 +647,7 @@
           </div>
           <div style="${cardStyle}margin-bottom:16px;">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
-              <strong>⑦ 性別をお選びください（任意）</strong>
+              <strong>⑦ 性別をお選びください</strong><span style="color:#c5221f;"> *</span>
             </p>
             ${['男','女','その他','回答しない'].map(v => `<label style="${qLabel}"><input type="radio" name="gender" value="${v}" style="${rbStyle}"> ${v}</label>`).join('')}
           </div>
