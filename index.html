@@ -114,7 +114,7 @@
 
   <div id="screen-start" class="screen">
     <h1 style="font-size:20px; margin-bottom:32px;">SoundFlow</h1>
-    <button class="btn btn-primary" onclick="startExperiment()">解約手続きを開始する</button>
+    <button id="start-btn" class="btn btn-primary" onclick="startExperiment()">解約手続きを開始する</button>
     <p style="color:#ffffff; font-size:15px; line-height:1.9; margin-top:32px; margin-bottom:0;">
       あなたは音楽配信サービス「SoundFlow」プレミアムプランを<br>
       利用していましたが、<strong>『月額料金が高い』</strong>と感じています。<br>
@@ -145,9 +145,28 @@
   <script>
     /* 動きの設定（JavaScript） */
     
-    // URLから条件(A, B, C)を読み取る
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx0DzAQKBP8XJ-FdZsTkxhTxxXeAMoSGLFVZXN-wKtgXktoClIa_rRfXU2V0YihouUY/exec';
+
+    // 条件(A, B, C, D)の割り当て。URLに ?cond=A のような指定があればそれを使用（動作確認用）。
+    // 指定がなければサーバー側（GAS）に問い合わせて、これまでの割り当て件数が最も少ない条件をランダムに1つ受け取る。
     const urlParams = new URLSearchParams(window.location.search);
-    const cond = (urlParams.get('cond') || 'A').toUpperCase();
+    let cond = urlParams.get('cond') ? urlParams.get('cond').toUpperCase() : null;
+
+    const startBtn = document.getElementById('start-btn');
+    const condReady = cond
+      ? Promise.resolve()
+      : (() => {
+          startBtn.disabled = true;
+          startBtn.textContent = '準備中...';
+          return fetch(`${GAS_URL}?action=assign`)
+            .then(res => res.json())
+            .then(data => { cond = data.condition; })
+            .catch(() => { cond = ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]; })
+            .finally(() => {
+              startBtn.disabled = false;
+              startBtn.textContent = '解約手続きを開始する';
+            });
+        })();
 
     // 今日から7日後の日付
     const _d = new Date(); _d.setDate(_d.getDate() + 7);
@@ -491,8 +510,6 @@
       selectedReasons = checked.map(el => el.value);
       nextStep();
     }
-
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx0DzAQKBP8XJ-FdZsTkxhTxxXeAMoSGLFVZXN-wKtgXktoClIa_rRfXU2V0YihouUY/exec';
 
     // 手続き完了・データ記録
     function finishExp(decision, extra = {}) {
