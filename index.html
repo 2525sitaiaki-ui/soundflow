@@ -86,6 +86,32 @@
 </head>
 <body>
 
+  <!-- モバイル制限モーダル -->
+  <div id="mobile-block" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+       background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+    <div style="background:#1a1a1a; border-radius:12px; padding:32px 24px; max-width:360px; width:100%; text-align:center; border:1px solid #333;">
+      <div style="font-size:48px; margin-bottom:16px;">💻</div>
+      <h2 style="font-size:18px; color:#ffffff; margin-bottom:12px; line-height:1.5;">この実験はパソコンで<br>行うことを想定しています</h2>
+      <p style="font-size:13px; color:#b3b3b3; margin-bottom:24px; line-height:1.7;">
+        スマートフォン・タブレットからのアクセスが検出されました。<br>
+        PCのブラウザで下記のURLを開いてください。
+      </p>
+      <div style="background:#282828; border-radius:8px; padding:12px 14px; margin-bottom:16px; word-break:break-all;
+                  font-size:12px; color:#b3b3b3; text-align:left; border:1px solid #383838;" id="mobile-url-display"></div>
+      <button onclick="copyUrl()"
+              style="width:100%; padding:13px; border-radius:500px; border:none; background:#ffffff;
+                     color:#000000; font-weight:bold; font-size:14px; cursor:pointer; margin-bottom:10px;"
+              id="copy-btn">
+        📋 URLをコピーする
+      </button>
+      <button onclick="shareUrl()"
+              style="width:100%; padding:13px; border-radius:500px; border:none; background:#1DB954;
+                     color:#000000; font-weight:bold; font-size:14px; cursor:pointer;">
+        📤 URLをシェアする
+      </button>
+    </div>
+  </div>
+
   <div id="screen-start" class="screen">
     <h1 style="font-size:20px; margin-bottom:32px;">SoundFlow</h1>
     <button class="btn btn-primary" onclick="startExperiment()">解約手続きを開始する</button>
@@ -456,7 +482,7 @@
     // 条件Dのチェックボックス検証
     function checkboxChanged() {
       const checked = document.querySelectorAll('#content-area input[type=checkbox]:checked');
-      document.getElementById('next-btn-d').disabled = checked.length === 0;
+      document.getElementById('next-btn-d').disabled = checked.length === 0;  
     }
 
     // 条件D: チェックボックス確定→最終確認ステップへ
@@ -475,7 +501,6 @@
       const timeElapsed = endTime - startTime;
 
       document.getElementById('screen-main').classList.add('hidden');
-
 
       // スプレッドシートへ送信
       const payload = {
@@ -558,51 +583,35 @@
 
       const surveyBlock = `
         <div id="survey-form" style="margin-top:24px;background:#f1f8e9;padding:20px;border-radius:12px;text-align:left;">
-
           <div style="background:#ffffff;border-radius:8px;padding:20px 24px;margin-bottom:12px;border-top:8px solid #1DB954;box-shadow:0 1px 2px rgba(60,64,67,0.15);">
             <p style="font-size:18px;color:#202124;font-weight:400;margin-bottom:6px;">アンケート</p>
             <p style="font-size:13px;color:#5f6368;margin-bottom:0;">所要時間：約1分</p>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>① あなたは先ほどの画面で、解約手続きが正常に完了できましたか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <label style="${qLabel}">
-              <input type="radio" name="q1" value="はい" style="${rbStyle}"> はい（解約できた）
-            </label>
-            <label style="${qLabel}margin-bottom:0;">
-              <input type="radio" name="q1" value="いいえ" style="${rbStyle}"> いいえ（解約できなかった）
-            </label>
+            <label style="${qLabel}"><input type="radio" name="q1" value="はい" style="${rbStyle}"> はい（解約できた）</label>
+            <label style="${qLabel}margin-bottom:0;"><input type="radio" name="q1" value="いいえ" style="${rbStyle}"> いいえ（解約できなかった）</label>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>② 今回の解約手続きにおいて、どの程度スムーズに操作が進められたと感じましたか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <div style="display:flex;gap:4px;justify-content:space-between;">
-              ${likert('q2','1 強い不快感や迷いを感じた','5 スムーズに進められた')}
-            </div>
+            <div style="display:flex;gap:4px;justify-content:space-between;">${likert('q2','1 強い不快感や迷いを感じた','5 スムーズに進められた')}</div>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>③ このサービスを運営する事業者に対して、どの程度信頼感を持てましたか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <div style="display:flex;gap:4px;justify-content:space-between;">
-              ${likert('q3','1 強い不信感を抱いた','5 非常に信頼できる')}
-            </div>
+            <div style="display:flex;gap:4px;justify-content:space-between;">${likert('q3','1 強い不信感を抱いた','5 非常に信頼できる')}</div>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>④ 料金が見直されるなど改善があった場合、このサービスを再度利用したいと思いますか？</strong><span style="color:#c5221f;"> *</span>
             </p>
-            <div style="display:flex;gap:4px;justify-content:space-between;">
-              ${likert('q4','1 二度と利用したくない','5 再度利用したい')}
-            </div>
+            <div style="display:flex;gap:4px;justify-content:space-between;">${likert('q4','1 二度と利用したくない','5 再度利用したい')}</div>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑤ 今回の操作で印象に残った点・不快に感じた点があれば自由にご記入ください（任意）</strong>
@@ -611,7 +620,6 @@
               style="width:100%;background:#ffffff;border:none;border-bottom:1px solid #dadce0;color:#202124;
                      padding:4px 0;resize:none;font-size:13px;box-sizing:border-box;outline:none;"></textarea>
           </div>
-
           <div style="${cardStyle}">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑥ 年齢をご記入ください（任意）</strong>
@@ -620,17 +628,12 @@
               style="width:100px;background:#ffffff;border:none;border-bottom:1px solid #dadce0;
                      color:#202124;padding:4px 0;font-size:13px;outline:none;">
           </div>
-
           <div style="${cardStyle}margin-bottom:16px;">
             <p style="font-size:14px;color:#202124;margin-bottom:14px;line-height:1.6;">
               <strong>⑦ 性別をお選びください（任意）</strong>
             </p>
-            ${['男','女','その他','回答しない'].map(v => `
-              <label style="${qLabel}">
-                <input type="radio" name="gender" value="${v}" style="${rbStyle}"> ${v}
-              </label>`).join('')}
+            ${['男','女','その他','回答しない'].map(v => `<label style="${qLabel}"><input type="radio" name="gender" value="${v}" style="${rbStyle}"> ${v}</label>`).join('')}
           </div>
-
           <button onclick="submitSurvey('${decCode}')"
             style="width:100%;padding:14px;border-radius:4px;border:none;
                    background:#1DB954;color:#ffffff;font-weight:bold;font-size:15px;cursor:pointer;">
@@ -640,7 +643,6 @@
         </div>
       `;
 
-      // 送信後に開示するマイページ（decision でバッジを切り替え）
       const isCancelled = decision === 'cancel';
       const badgeText  = isCancelled ? '解約済み' : '継続中';
       const badgeColor = isCancelled ? '#e91429'  : '#1DB954';
@@ -651,14 +653,9 @@
 
       const myPageHtml = `
         <div id="mypage-reveal" style="display:none; background:#121212; margin-top:24px; border-radius:8px; overflow:hidden;">
-
-          <!-- ヘッダー -->
-          <div style="background:#121212; padding:16px 20px; display:flex;
-                      align-items:center; border-bottom:1px solid #282828;">
+          <div style="background:#121212; padding:16px 20px; display:flex; align-items:center; border-bottom:1px solid #282828;">
             <span style="font-size:18px; font-weight:bold; color:#1DB954; letter-spacing:1px;">SoundFlow</span>
           </div>
-
-          <!-- プロフィール -->
           <div style="padding:28px 20px 20px; display:flex; align-items:center; gap:16px;">
             <div style="width:64px; height:64px; border-radius:50%; background:#535353;
                         display:flex; align-items:center; justify-content:center;
@@ -668,8 +665,6 @@
               <div style="font-size:13px; color:#b3b3b3;">tanaka.jikken@example.com</div>
             </div>
           </div>
-
-          <!-- プラン情報 -->
           <div style="margin:0 16px 16px; background:#282828; border-radius:8px; padding:18px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
               <span style="font-size:14px; font-weight:bold;">現在のプラン</span>
@@ -680,8 +675,6 @@
             <div style="font-size:13px; color:#b3b3b3;">¥980 / 月</div>
             ${planDateLine}
           </div>
-
-          <!-- メニューリスト -->
           ${[
             ['👤', 'プロフィールの編集'],
             ['💳', 'お支払い情報'],
@@ -692,15 +685,13 @@
           ].map(([icon, label]) => `
             <div style="display:flex; align-items:center; gap:14px; padding:16px 20px;
                         border-bottom:1px solid #282828; color:#fff; font-size:14px;">
-              <span style="font-size:18px;">${icon}</span>
-              <span>${label}</span>
+              <span style="font-size:18px;">${icon}</span><span>${label}</span>
               <span style="margin-left:auto; color:#535353; font-size:18px;">›</span>
             </div>
           `).join('')}
         </div>
       `;
 
-      // cancel / keep 共通の中立終了画面
       el.className = 'screen';
       el.style.maxWidth = '730px';
       el.innerHTML = `
@@ -710,6 +701,49 @@
         ${myPageHtml}
       `;
     }
+
+    // モバイル検知
+    function checkMobile() {
+      const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const modal = document.getElementById('mobile-block');
+      if (isMobile) {
+        document.getElementById('mobile-url-display').textContent = window.location.href;
+        modal.style.display = 'flex';
+      } else {
+        modal.style.display = 'none';
+      }
+    }
+
+    function copyUrl() {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ コピーしました！';
+        setTimeout(() => { btn.textContent = '📋 URLをコピーする'; }, 2000);
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ コピーしました！';
+        setTimeout(() => { btn.textContent = '📋 URLをコピーする'; }, 2000);
+      });
+    }
+
+    function shareUrl() {
+      const url = window.location.href;
+      if (navigator.share) {
+        navigator.share({ url: url }).catch(() => {});
+      } else {
+        copyUrl();
+      }
+    }
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
 
   </script>
 </body>
