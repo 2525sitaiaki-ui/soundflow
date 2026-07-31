@@ -89,24 +89,24 @@
   <!-- モバイル制限モーダル -->
   <div id="mobile-block" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
        background:rgba(0,0,0,0.97); z-index:9999; justify-content:center; align-items:center; padding:24px; box-sizing:border-box;">
-    <div style="background:#1a1a1a; border-radius:25px; padding:56px 36px; max-width:550px; width:100%; text-align:center; border:1px solid #333;">
-      <div style="font-size:90px; margin-bottom:28px;">💻</div>
-      <h2 style="font-size:32px; color:#ffffff; margin-bottom:25px; line-height:1.5; font-weight:bold;">この実験はパソコンで<br>行うことを想定しています</h2>
-      <p style="font-size:20px; color:#d0d0d0; margin-bottom:40px; line-height:1.8;">
+    <div style="background:#1a1a1a; border-radius:30px; padding:66px 42px; max-width:650px; width:100%; text-align:center; border:1px solid #333;">
+      <div style="font-size:106px; margin-bottom:32px;">💻</div>
+      <h2 style="font-size:38px; color:#ffffff; margin-bottom:30px; line-height:1.5; font-weight:bold;">この実験はパソコンで<br>行うことを想定しています</h2>
+      <p style="font-size:24px; color:#d0d0d0; margin-bottom:48px; line-height:1.8;">
         スマートフォン・タブレットからの<br>アクセスが検出されました。<br>
         PCのブラウザで下記のURLを<br>開いてください。
       </p>
-      <div style="background:#282828; border-radius:12px; padding:20px 22px; margin-bottom:28px; word-break:break-all;
-                  font-size:18px; color:#e0e0e0; text-align:left; border:1px solid #383838;" id="mobile-url-display"></div>
+      <div style="background:#282828; border-radius:14px; padding:24px 26px; margin-bottom:32px; word-break:break-all;
+                  font-size:21px; color:#e0e0e0; text-align:left; border:1px solid #383838;" id="mobile-url-display"></div>
       <button onclick="copyUrl()"
-              style="width:100%; padding:24px; border-radius:500px; border:none; background:#ffffff;
-                     color:#000000; font-weight:bold; font-size:22px; cursor:pointer; margin-bottom:18px;"
+              style="width:100%; padding:28px; border-radius:500px; border:none; background:#ffffff;
+                     color:#000000; font-weight:bold; font-size:26px; cursor:pointer; margin-bottom:20px;"
               id="copy-btn">
         📋 URLをコピーする
       </button>
       <button onclick="shareUrl()"
-              style="width:100%; padding:24px; border-radius:500px; border:none; background:#1DB954;
-                     color:#000000; font-weight:bold; font-size:22px; cursor:pointer;">
+              style="width:100%; padding:28px; border-radius:500px; border:none; background:#1DB954;
+                     color:#000000; font-weight:bold; font-size:26px; cursor:pointer;">
         📤 URLをシェアする
       </button>
     </div>
@@ -723,10 +723,12 @@
     function checkMobile() {
       // 「PC版サイトをリクエスト」で window.innerWidth と navigator.userAgent は偽装されるため、
       // 偽装されにくい実画面サイズ（screen.width）とタッチ対応（maxTouchPoints）も併せて判定する。
+      // ただしWindows機（Surfaceなど）はタッチ対応でも実質PC利用のため、タッチ判定からは除外する。
+      const isWindows = /Windows NT/i.test(navigator.userAgent);
       const isMobile = window.innerWidth < 768
         || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
         || Math.min(screen.width, screen.height) < 768
-        || navigator.maxTouchPoints > 0;
+        || (navigator.maxTouchPoints > 0 && !isWindows);
       const modal = document.getElementById('mobile-block');
       if (isMobile) {
         document.getElementById('mobile-url-display').textContent = window.location.href;
