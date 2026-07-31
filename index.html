@@ -723,12 +723,15 @@
     function checkMobile() {
       // 「PC版サイトをリクエスト」で window.innerWidth と navigator.userAgent は偽装されるため、
       // 偽装されにくい実画面サイズ（screen.width）とタッチ対応（maxTouchPoints）も併せて判定する。
-      // ただしWindows機（Surfaceなど）はタッチ対応でも実質PC利用のため、タッチ判定からは除外する。
+      // ただしWindows機はUA偽装の心配がなく、また画面拡大率設定でscreen.widthが実寸より小さく
+      // 報告されるノートPCも多いため、window.innerWidthのみで判定する。
       const isWindows = /Windows NT/i.test(navigator.userAgent);
-      const isMobile = window.innerWidth < 768
-        || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-        || Math.min(screen.width, screen.height) < 768
-        || (navigator.maxTouchPoints > 0 && !isWindows);
+      const isMobile = isWindows
+        ? window.innerWidth < 768
+        : window.innerWidth < 768
+          || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+          || Math.min(screen.width, screen.height) < 768
+          || navigator.maxTouchPoints > 0;
       const modal = document.getElementById('mobile-block');
       if (isMobile) {
         document.getElementById('mobile-url-display').textContent = window.location.href;
