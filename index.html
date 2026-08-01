@@ -127,7 +127,8 @@
       <h2 style="font-size:38px; color:#ffffff; margin-bottom:30px; line-height:1.5; font-weight:bold;">この実験はパソコンで<br>行うことを想定しています</h2>
       <p style="font-size:24px; color:#d0d0d0; margin-bottom:48px; line-height:1.8;">
         スマートフォン・タブレットからの<br>アクセスが検出されました。<br>
-        PCのブラウザで下記のURLを<br>開いてください。
+        PCから下記のURLを開いてください。<br>
+        ※PCは「全画面」で開いてください。
       </p>
       <div style="background:#282828; border-radius:14px; padding:24px 26px; margin-bottom:32px; word-break:break-all;
                   font-size:21px; color:#e0e0e0; text-align:left; border:1px solid #383838;" id="mobile-url-display"></div>
@@ -163,7 +164,7 @@
         <strong>解約手続きを行ってください。</strong>
       </p>
       <div class="btn-row">
-        <button id="start-btn" class="btn btn-primary" onclick="startExperiment()">解約手続きを開始する</button>
+        <button id="start-btn" class="btn btn-primary" onclick="startExperiment()">解約手続きを開始（調査用のページへ遷移します）</button>
       </div>
     </div>
 
@@ -209,7 +210,7 @@
             .catch(() => { cond = ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)]; })
             .finally(() => {
               startBtn.disabled = false;
-              startBtn.textContent = '解約手続きを開始する';
+              startBtn.textContent = '解約手続きを開始（調査用のページへ遷移します）';
             });
         })();
 
